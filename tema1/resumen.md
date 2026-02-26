@@ -153,3 +153,5 @@ Estos tres conceptos son los **pilares fundamentales** para diseñar, administra
 ---
 
 *Asignatura: Administración de Redes — Ingeniería Informática (UAX)*
+
+*Test 25/02/2026* 9/10
