@@ -178,6 +178,6 @@ Las VLANs son un mecanismo de segmentación a nivel de **capa 2** (trabajan con 
 
 ---
 
-*Asignatura: Administración de Redes — Ingeniería Informática (UAX)*
+*Asignatura: Administrgitación de Redes — Ingeniería Informática (UAX)*
 
 *Test 25/02/2026* 9/10
