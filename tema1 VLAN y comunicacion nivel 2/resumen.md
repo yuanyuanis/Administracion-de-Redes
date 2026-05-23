@@ -23,11 +23,18 @@ A diferencia de un hub (que reenvía todo el tráfico por todos sus puertos), el
 
 ### ¿Qué es un Dominio de Difusión (Broadcast Domain)?
 
-Un **dominio de broadcast** es el conjunto de todos los dispositivos que reciben una trama de difusión (broadcast) enviada por cualquiera de ellos. Cuando un dispositivo envía una trama con dirección MAC destino `FF:FF:FF:FF:FF:FF`, esta llega a **todos los dispositivos dentro del mismo dominio de broadcast**.
+Un **dominio de broadcast** es el conjunto de todos los dispositivos que reciben una trama de difusión (broadcast) enviada por cualquiera de ellos. 
 
-En un switch sin VLANs configuradas, **todos los puertos forman un único dominio de broadcast**. Esto significa que un broadcast enviado desde cualquier puerto inunda todos los demás puertos del switch. En redes grandes, esto genera tráfico innecesario y problemas de rendimiento.
+Cuando un dispositivo envía una trama con dirección MAC destino `FF:FF:FF:FF:FF:FF`, esta llega a **todos los dispositivos dentro del mismo dominio de broadcast**.
 
-**Problema:** A medida que una red crece, el tráfico broadcast se incrementa, consumiendo ancho de banda y reduciendo el rendimiento general. Aquí es donde entran las VLANs como solución.
+En un switch sin VLANs configuradas, **todos los puertos forman un único dominio de broadcast**. 
+
+Esto significa que un broadcast enviado desde cualquier puerto inunda todos los demás puertos del switch. 
+En redes grandes, esto genera tráfico innecesario y problemas de rendimiento.
+
+**Problema:** A medida que una red crece, el tráfico broadcast se incrementa, consumiendo ancho de banda y reduciendo el rendimiento general. 
+
+Aquí es donde entran las VLANs como solución.
 
 ---
 
@@ -35,11 +42,14 @@ En un switch sin VLANs configuradas, **todos los puertos forman un único domini
 
 **VLAN** = **Virtual Local Area Network** (Red de Área Local Virtual).
 
-Una VLAN crea un **dominio de difusión independiente a nivel 2** dentro de un mismo switch físico. Permite **separar lógicamente una red sin necesidad de cambiar el cableado físico**.
+Una VLAN crea un **dominio de difusión independiente a nivel 2** dentro de un mismo switch físico. 
+
+Permite **separar lógicamente una red sin necesidad de cambiar el cableado físico**.
 
 ### ¿Cómo funciona?
 
-El administrador asigna puertos específicos del switch a VLANs específicas. Los dispositivos conectados a puertos de la misma VLAN pueden comunicarse entre sí, pero **no pueden comunicarse directamente** con dispositivos de otra VLAN (están en dominios de broadcast distintos).
+El administrador asigna puertos específicos del switch a VLANs específicas. 
+Los dispositivos conectados a puertos de la misma VLAN pueden comunicarse entre sí, pero **no pueden comunicarse directamente** con dispositivos de otra VLAN (están en dominios de broadcast distintos).
 
 **Ejemplo práctico:** Imaginemos un switch con 24 puertos en una empresa con tres departamentos:
 
@@ -51,7 +61,9 @@ Si un equipo de Ingeniería envía un broadcast, solo lo reciben los equipos de 
 
 ### Detalle técnico
 
-Las VLANs creadas se almacenan en la **base de datos del switch** en un archivo llamado **`vlan.dat`**. Este archivo persiste incluso si se borra la configuración de arranque (startup-config), lo cual es un detalle importante a tener en cuenta en la administración.
+Las VLANs creadas se almacenan en la **base de datos del switch** en un archivo llamado **`vlan.dat`**. 
+
+Este archivo persiste incluso si se borra la configuración de arranque (startup-config), lo cual es un detalle importante a tener en cuenta en la administración.
 
 ---
 
@@ -74,7 +86,11 @@ Las VLANs ofrecen ventajas significativas para el diseño y la administración d
 
 ## 4. El Problema Multi-Switch
 
-En redes reales, las empresas utilizan **múltiples switches**. Un mismo departamento puede tener empleados conectados a switches distintos (en edificios o plantas diferentes). Surge la necesidad de **extender la VLAN entre switches**.
+En redes reales, las empresas utilizan **múltiples switches**. 
+
+Un mismo departamento puede tener empleados conectados a switches distintos (en edificios o plantas diferentes). 
+
+Surge la necesidad de **extender la VLAN entre switches**.
 
 ### La solución incorrecta: Un cable por VLAN
 
@@ -100,7 +116,11 @@ Un **puerto Trunk** es un puerto del switch configurado para **transportar tráf
 
 ### ¿Cómo funciona? — Etiquetado 802.1Q
 
-Cuando una trama viaja por un enlace trunk, el switch de origen añade una **etiqueta (tag)** a la trama Ethernet siguiendo el estándar **IEEE 802.1Q**. Esta etiqueta contiene el **identificador de la VLAN (VLAN ID)** a la que pertenece la trama.
+Cuando una trama viaja por un enlace trunk, 
+el switch de origen añade una **etiqueta (tag)** a la trama Ethernet siguiendo el estándar **IEEE 802.1Q**. 
+Esta etiqueta contiene el **identificador de la VLAN (VLAN ID)** a la que pertenece la trama.
+
+![alt text](image.png)
 
 El proceso es el siguiente:
 
@@ -153,4 +173,26 @@ Estos tres conceptos son los **pilares fundamentales** para diseñar, administra
 ---
 
 *Asignatura: Administración de Redes — Ingeniería Informática (UAX)*
+
+### Matiz importante: comunicar equipos no es lo mismo que comunicar VLANs
+
+En ejercicios de arquitectura de nivel 2 hay que distinguir entre dos ideas parecidas, pero no iguales:
+
+- Que dos equipos de VLANs diferentes puedan intercambiar datos.
+- Que dos VLANs estén comunicadas correctamente manteniendo separados sus dominios de difusión.
+
+Dos equipos de VLANs distintas podrían llegar a intercambiar tramas a nivel 2 si se unen físicamente de forma incorrecta, por ejemplo:
+
+- mediante un cable cruzado entre puertos de distintas VLANs;
+- mediante un hub que conecte equipos o puertos pertenecientes a VLANs diferentes.
+
+Pero esto no significa que las VLANs estén bien comunicadas. En realidad, se está rompiendo la segmentación, porque se mezclan dominios de difusión que deberían permanecer separados.
+
+Por tanto:
+
+- **Cable cruzado entre VLANs diferentes** → puede permitir comunicación, pero es una mala práctica.
+- **Hub entre VLANs diferentes** → puede permitir comunicación, pero también rompe el aislamiento.
+- **Router o switch de capa 3** → es la forma correcta de comunicar VLANs distintas, porque permite el paso entre redes manteniendo separados los dominios de broadcast de nivel 2.
+
+En una comunicación mediante router, no basta con que el router esté físicamente conectado. La comunicación dependerá también de la configuración IP: las subredes de cada VLAN, las direcciones IP de las máquinas, las interfaces del router y las puertas de enlace configuradas.
 
