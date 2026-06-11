@@ -709,25 +709,41 @@ En redes más grandes, cambiantes o donde se necesita tolerancia a fallos.
 
 ## 14. Resumen final del tema
 
-El routing consiste en conectar redes distintas.
+- **Routing** = proceso por el que un router decide por dónde enviar un paquete hacia otra red.
+- Un **PC** solo sabe hablar con su red local; todo lo demás lo envía a su **gateway**.
+- El **gateway** es la IP del router dentro de la propia subred del PC.
+- Una **IP** siempre se interpreta junto a su **máscara**: juntas definen la **subred**.
+- Una **/27** tiene **32 direcciones**: **30 hosts útiles** — se restan red y broadcast.
+- El **router** conecta redes distintas: cada interfaz vive en una subred diferente.
+- La **tabla de rutas** (`show ip route`) dice: “para llegar a la red X, sal por este siguiente salto”.
+- **Rutas conectadas (C)**: redes donde el router tiene una interfaz; las conoce solas.
+- **Rutas estáticas (S)**: configuradas a mano con `ip route RED MÁSCARA SALTO`.
+- **Ventajas del estático**: control total, predecible, sin tráfico de protocolo.
+- **Inconvenientes**: mantenimiento manual, no reacciona a fallos, escala mal.
+- **Ruta por defecto (S*)**: `ip route 0.0.0.0 0.0.0.0 SALTO` → “lo que no sepas, mándalo ahí”.
+- Solo se usa cuando **no existe ninguna ruta más específica**.
+- **Rutas dinámicas**: aprendidas por protocolos (**RIP, OSPF, EIGRP, BGP**).
+- **Ventajas**: se adaptan a cambios y fallos, escalan mejor; **pegas**: más complejas, menos control.
+- **Decisión del router**, en orden: **prefijo más específico → distancia administrativa → métrica**.
+- **Longest prefix match**: entre `/24` y `/27` que coinciden con el destino, gana la `/27`.
+- **Distancia administrativa** = confianza en la fuente: **conectada > estática > dinámica**.
+- **Métrica**: compara caminos dentro del mismo protocolo.
+- **RIP** (`R` en la tabla): protocolo dinámico simple; métrica = número de saltos; máximo **15**.
+- **RIP** elige el camino con menos saltos aunque sea peor: no ve calidad de enlace.
+- **RIP v2 > RIP v1** porque transporta la máscara: soporta subredes de tamaño variable.
+- `network 190.146.100.0` indica en qué redes/interfaces participa RIP, no publica una subred concreta.
+- **Reconvergencia**: tras un fallo, RIP aprende otro camino solo, pero tarda unos segundos.
+- **PBR** permite elegir la ruta según una política, normalmente el origen, no solo según el destino.
+- **OSPF**: métrica por coste, converge rápido, escala con áreas.
+- **EIGRP**: Cisco, métrica compuesta.
+- **BGP**: entre sistemas autónomos / Internet.
+- El routing normal decide por **destino**; decidir por **origen** es un caso especial: **PBR**, con `route-maps`.
+- **ARP** traduce **IP → MAC** solo en la red local; para destinos remotos, el PC resuelve la MAC del **gateway**, no la del host final.
+- **Verificación**: `ping` — ¿llega?, `traceroute` — ¿por dónde?, `show ip route` — ¿qué sabe el router?, `arp -a` — caché ARP.
+- **Caso ISP**: estático si controlas toda la red estable; dinámico si necesitas tolerancia a fallos; lo realista es una solución mixta.
+- **Cadena clave**: **IP + máscara → subred → gateway → router → tabla de rutas → siguiente salto → conectividad**.
 
-Un router decide usando su tabla de rutas. Las rutas pueden ser:
-
-- directamente conectadas;
-- estáticas;
-- por defecto;
-- dinámicas.
-
-RIP es un protocolo dinámico sencillo que aprende rutas mediante número de saltos.
-
-El routing estático da control, pero exige mantenimiento manual.
-
-El routing dinámico se adapta mejor a fallos, pero es más complejo.
-
-En la práctica de Packet Tracer se aplican estos conceptos configurando routers, subredes, RIP, rutas, ping, traceroute y ARP.
-
-La idea importante no es memorizar comandos sueltos, sino entender esta cadena:
-
+Si quieres, te lo reduzco a una "chuleta" de 10 líneas para repasar justo antes del examen.
 ```text
 IP + máscara → subred
 subred distinta → gateway
